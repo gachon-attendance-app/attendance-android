@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- 백엔드 API 통신용 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -10,10 +13,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.MyApplication">
 
+        <!-- 앱 시작 화면 -->
         <activity
-            android:name=".WeekActivity"
+            android:name=".LoadingActivity"
             android:exported="true"
             android:theme="@style/Theme.MyApplication">
 
@@ -24,12 +29,37 @@
 
         </activity>
 
+        <!-- 로그인 화면 -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication" />
+
+        <!-- 회원가입 화면 -->
+        <activity
+            android:name=".SignupActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication" />
+
+        <!-- 메인 화면 / 사이드바 / 하단바 / 화면 전환 -->
         <activity
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/app_name"
             android:theme="@style/Theme.MyApplication" />
 
+        <!-- 주간 출결 화면 -->
+        <activity
+            android:name=".WeekActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication" />
+
+        <!-- 시간표 등록 화면 -->
+        <activity
+            android:name=".RegisterScheduleActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication" />
+
     </application>
-    <activity android:name=".RegisterScheduleActivity" />
+
 </manifest>

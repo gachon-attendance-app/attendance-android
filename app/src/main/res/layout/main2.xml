@@ -33,7 +33,7 @@
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_sort_by_size" />
+            android:src="@drawable/menu" />
     </LinearLayout>
 
     <!-- 날짜 / 교시 -->
@@ -123,7 +123,7 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/tabler_clock"
-                        app:tint="#555555" />
+                        android:tint="#555555" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -141,17 +141,17 @@
                     android:layout_height="170dp"
                     android:layout_marginTop="38dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/maingray" />
+                    android:src="@drawable/mainblue" />
 
                 <TextView
                     android:id="@+id/tvAttendanceStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
-                    android:text="미출석"
-                    android:textColor="#9E9EA4"
+                    android:text="출석 완료"
+                    android:textColor="@color/teriary400"
                     android:textSize="32sp"
-                    android:textStyle="bold" />
+                    android:fontFamily="@font/pretendard_bold"/>
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -215,7 +215,7 @@
                     android:id="@+id/btnAttendance"
                     android:layout_width="84dp"
                     android:layout_height="84dp"
-                    android:backgroundTint="#005BAC"
+                    android:backgroundTint="@color/grey200"
                     android:text="출석\n체크"
                     android:textColor="#FFFFFF"
                     android:textSize="18sp"
@@ -233,44 +233,49 @@
         android:orientation="horizontal">
 
         <ImageButton
+            android:id="@+id/btnBottomHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_home"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/home"
+            android:tint="#FFFFFF" />
 
         <ImageButton
+            android:id="@+id/btnBottomRefresh"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_revert"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/retry"
+            android:tint="#FFFFFF" />
 
         <ImageButton
+            android:id="@+id/btnBottomNotice"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_dialog_info"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/bell"
+            android:tint="#FFFFFF" />
 
         <ImageButton
+            android:id="@+id/btnBottomSchedule"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_manage"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/calendar"
+            android:tint="#FFFFFF" />
 
         <ImageButton
+            android:id="@+id/btnBottomLogout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_send"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/back"
+            android:tint="#FFFFFF" />
     </LinearLayout>
 
 </LinearLayout>

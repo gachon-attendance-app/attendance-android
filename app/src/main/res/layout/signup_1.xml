@@ -29,7 +29,7 @@
             android:background="@android:color/transparent"
             android:contentDescription="뒤로가기"
             android:padding="14dp"
-            android:src="@android:drawable/ic_media_previous"
+            android:src="@drawable/arrow"
             android:tint="#FFFFFF" />
 
         <TextView
@@ -85,7 +85,7 @@
                 android:contentDescription="학생 선택"
                 android:padding="32dp"
                 android:scaleType="centerInside"
-                android:src="@android:drawable/ic_menu_myplaces"
+                android:src="@drawable/professor"
                 android:tint="#BDBDBD" />
 
             <Space
@@ -101,7 +101,7 @@
                 android:contentDescription="교수 선택"
                 android:padding="32dp"
                 android:scaleType="centerInside"
-                android:src="@android:drawable/ic_menu_manage"
+                android:src="@drawable/student"
                 android:tint="#BDBDBD" />
 
         </LinearLayout>

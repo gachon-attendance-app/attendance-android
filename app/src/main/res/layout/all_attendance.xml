@@ -34,7 +34,7 @@
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_sort_by_size"
+            android:src="@drawable/menu"
             android:contentDescription="@null" />
     </LinearLayout>
 
@@ -493,53 +493,53 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/btnHome"
+            android:id="@+id/btnBottomHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_home"
-            app:tint="#FFFFFF"
+            android:src="@drawable/home"
+            android:tint="#FFFFFF"
             android:contentDescription="@null" />
 
         <ImageButton
-            android:id="@+id/btnRefresh"
+            android:id="@+id/btnBottomRefresh"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_revert"
-            app:tint="#FFFFFF"
+            android:src="@drawable/retry"
+            android:tint="#FFFFFF"
             android:contentDescription="@null" />
 
         <ImageButton
-            android:id="@+id/btnAlarm"
+            android:id="@+id/btnBottomNotice"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_dialog_info"
-            app:tint="#FFFFFF"
+            android:src="@drawable/bell"
+            android:tint="#FFFFFF"
             android:contentDescription="@null" />
 
         <ImageButton
-            android:id="@+id/btnList"
+            android:id="@+id/btnBottomSchedule"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_manage"
-            app:tint="#FFFFFF"
+            android:src="@drawable/calendar"
+            android:tint="#FFFFFF"
             android:contentDescription="@null" />
 
         <ImageButton
-            android:id="@+id/btnLogout"
+            android:id="@+id/btnBottomLogout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_send"
-            app:tint="#FFFFFF"
+            android:src="@drawable/back"
+            android:tint="#FFFFFF"
             android:contentDescription="@null" />
     </LinearLayout>
 

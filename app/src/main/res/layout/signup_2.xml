@@ -29,7 +29,7 @@
             android:background="@android:color/transparent"
             android:contentDescription="뒤로가기"
             android:padding="14dp"
-            android:src="@android:drawable/ic_media_previous"
+            android:src="@drawable/arrow"
             android:tint="#FFFFFF" />
 
         <TextView
@@ -125,7 +125,7 @@
                 android:background="@android:color/transparent"
                 android:contentDescription="비밀번호 보기"
                 android:padding="12dp"
-                android:src="@android:drawable/ic_menu_view"
+                android:src="@drawable/eye"
                 android:tint="#777777" />
 
         </FrameLayout>
@@ -173,7 +173,7 @@
                 android:background="@android:color/transparent"
                 android:contentDescription="비밀번호 확인 보기"
                 android:padding="12dp"
-                android:src="@android:drawable/ic_menu_view"
+                android:src="@drawable/eye"
                 android:tint="#777777" />
 
         </FrameLayout>
@@ -232,8 +232,7 @@
                 android:fontFamily="@font/pretendard_regular"
                 android:text="이용 약관"
                 android:textColor="#222222"
-                android:textSize="12sp"
-                android:paintFlags="underline" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tvTermsSuffix"

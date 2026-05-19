@@ -33,8 +33,8 @@
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_sort_by_size"
-            app:tint="#707070" />
+            android:src="@drawable/menu"
+            android:tint="#707070" />
     </LinearLayout>
 
     <!-- 제목 카드 -->
@@ -628,49 +628,49 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/navHome"
+            android:id="@+id/btnBottomHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_home"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/home"
+            android:tint="#FFFFFF" />
 
         <ImageButton
-            android:id="@+id/navHistory"
+            android:id="@+id/btnBottomRefresh"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_revert"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/retry"
+            android:tint="#FFFFFF" />
 
         <ImageButton
-            android:id="@+id/navAlarm"
+            android:id="@+id/btnBottomNotice"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_dialog_info"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/bell"
+            android:tint="#FFFFFF" />
 
         <ImageButton
-            android:id="@+id/navList"
+            android:id="@+id/btnBottomSchedule"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_manage"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/calendar"
+            android:tint="#FFFFFF" />
 
         <ImageButton
-            android:id="@+id/navLogout"
+            android:id="@+id/btnBottomLogout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_send"
-            app:tint="#FFFFFF" />
+            android:src="@drawable/back"
+            android:tint="#FFFFFF" />
     </LinearLayout>
 
 </LinearLayout>
