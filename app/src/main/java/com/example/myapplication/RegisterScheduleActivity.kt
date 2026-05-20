@@ -10,14 +10,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
-import com.example.myapplication.model.Course
-import com.example.myapplication.model.CourseLookupResponse
-import com.example.myapplication.model.CourseTime
-import com.example.myapplication.model.SaveScheduleRequest
-import com.example.myapplication.model.SaveScheduleResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import org.json.JSONObject
 
 class RegisterScheduleActivity : Activity() {
 
@@ -27,12 +20,11 @@ class RegisterScheduleActivity : Activity() {
     private lateinit var classBlockLayer: FrameLayout
 
     private val selectedCourses = mutableListOf<Course>()
+    private var userId: Int = 1
 
-    private var userId: Int = -1
-
-    private val mockCourseData = mapOf(
+    private val localCourseData = mapOf(
         "MOB001" to Course(
-            classId = 1001,
+            classId = 10,
             code = "MOB001",
             name = "모바일프로그래밍 (영어강의)",
             professor = "민홍",
@@ -43,7 +35,7 @@ class RegisterScheduleActivity : Activity() {
             )
         ),
         "DATA001" to Course(
-            classId = 1002,
+            classId = 11,
             code = "DATA001",
             name = "자료구조 및 실습 (영어강의)",
             professor = "김교수",
@@ -54,7 +46,7 @@ class RegisterScheduleActivity : Activity() {
             )
         ),
         "SW001" to Course(
-            classId = 1003,
+            classId = 12,
             code = "SW001",
             name = "소프트웨어공학 (신기술화상강의)",
             professor = "박교수",
@@ -69,15 +61,7 @@ class RegisterScheduleActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.register_schedule)
 
-        userId = getSharedPreferences("userPrefs", MODE_PRIVATE)
-            .getInt("userId", -1)
-
-        if (userId == -1) {
-            val oldUserId = getSharedPreferences("LOGIN_INFO", MODE_PRIVATE)
-                .getString("userId", null)
-
-            userId = oldUserId?.toIntOrNull() ?: 1
-        }
+        userId = getSharedPreferences("LOGIN_INFO", MODE_PRIVATE).getInt("userId", 1)
 
         etCourseCode = findViewById(R.id.etCourseCode)
         btnAddClass = findViewById(R.id.btnAddClass)
@@ -92,7 +76,7 @@ class RegisterScheduleActivity : Activity() {
                 return@setOnClickListener
             }
 
-            lookupCourseFromBackend(inputCode)
+            lookupCourse(inputCode)
         }
 
         btnConfirmSchedule.setOnClickListener {
@@ -101,73 +85,26 @@ class RegisterScheduleActivity : Activity() {
                 return@setOnClickListener
             }
 
-            saveScheduleToBackend(selectedCourses)
+            saveScheduleToFirebase()
         }
     }
 
-    private fun lookupCourseFromBackend(courseCode: String) {
-        ApiClient.apiService.lookupCourse(courseCode)
-            .enqueue(object : Callback<CourseLookupResponse> {
-                override fun onResponse(
-                    call: Call<CourseLookupResponse>,
-                    response: Response<CourseLookupResponse>
-                ) {
-                    val body = response.body()
+    private fun lookupCourse(courseCode: String) {
+        FirebaseClient.get("courses/$courseCode") { json ->
+            val firebaseCourse = FirebaseParsers.course(json, courseCode)
+            val course = firebaseCourse ?: localCourseData[courseCode]
 
-                    if (response.isSuccessful && body?.success == true && body.course != null) {
-                        val course = convertResponseToCourse(body, courseCode)
-                        addCourseIfPossible(course)
-                    } else {
-                        addMockCourseIfPossible(courseCode)
-                    }
-                }
+            if (course == null) {
+                Toast.makeText(
+                    this,
+                    "등록되지 않은 과목 코드입니다. 테스트 코드: MOB001, DATA001, SW001",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@get
+            }
 
-                override fun onFailure(call: Call<CourseLookupResponse>, t: Throwable) {
-                    addMockCourseIfPossible(courseCode)
-                }
-            })
-    }
-
-    private fun convertResponseToCourse(
-        body: CourseLookupResponse,
-        inputCode: String
-    ): Course {
-        val info = body.course
-            ?: throw IllegalArgumentException(body.message ?: "강의 정보를 찾을 수 없습니다.")
-
-        val day = convertDayToKorean(info.dayOfWeek)
-        val startHour = extractHour(info.startTime)
-        val endHour = extractHour(info.endTime)
-
-        return Course(
-            classId = info.classId,
-            code = info.courseCode.ifBlank { inputCode },
-            name = info.courseName.ifBlank { "수업명 없음" },
-            professor = info.professorName.ifBlank { "교수명 없음" },
-            classroom = info.room.ifBlank { "강의실 없음" },
-            schedules = listOf(
-                CourseTime(
-                    day = day,
-                    startHour = startHour,
-                    endHour = endHour
-                )
-            )
-        )
-    }
-
-    private fun addMockCourseIfPossible(courseCode: String) {
-        val course = mockCourseData[courseCode]
-
-        if (course == null) {
-            Toast.makeText(
-                this,
-                "등록되지 않은 과목 코드입니다. 테스트 코드는 MOB001, DATA001, SW001 입니다.",
-                Toast.LENGTH_LONG
-            ).show()
-            return
+            addCourseIfPossible(course)
         }
-
-        addCourseIfPossible(course)
     }
 
     private fun addCourseIfPossible(course: Course) {
@@ -183,21 +120,12 @@ class RegisterScheduleActivity : Activity() {
 
         selectedCourses.add(course)
         etCourseCode.text.clear()
-
         addCourseToTimeTable(course)
-
-        Toast.makeText(this, "${course.name} 수업이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, course.name + " 수업이 추가되었습니다.", Toast.LENGTH_SHORT).show()
     }
 
     private fun addCourseToTimeTable(course: Course) {
-        val colors = listOf(
-            "#8FA2C7",
-            "#B9AAA5",
-            "#79B2B8",
-            "#A7B58D",
-            "#C39DA4"
-        )
-
+        val colors = listOf("#8FA2C7", "#B9AAA5", "#79B2B8", "#A7B58D", "#C39DA4")
         val color = colors[(selectedCourses.size - 1) % colors.size]
 
         for (time in course.schedules) {
@@ -217,7 +145,6 @@ class RegisterScheduleActivity : Activity() {
 
             params.leftMargin = getLeftMarginByDay(time.day)
             params.topMargin = getTopMarginByHour(time.startHour)
-
             classBlockLayer.addView(block, params)
         }
     }
@@ -230,79 +157,34 @@ class RegisterScheduleActivity : Activity() {
                     val overlap = selectedTime.startHour < newTime.endHour &&
                             newTime.startHour < selectedTime.endHour
 
-                    if (sameDay && overlap) {
-                        return true
-                    }
+                    if (sameDay && overlap) return true
                 }
             }
         }
-
         return false
     }
 
-    private fun saveScheduleToBackend(courses: List<Course>) {
-        val request = SaveScheduleRequest(
-            classIds = courses.map { it.classId }
-        )
+    private fun saveScheduleToFirebase() {
+        val body = JSONObject()
+            .put("success", true)
+            .put("studentId", userId)
+            .put("classes", FirebaseParsers.courseListToJson(selectedCourses))
+            .put("message", "시간표 저장 성공")
 
-        ApiClient.apiService.saveStudentSchedule(userId, request)
-            .enqueue(object : Callback<SaveScheduleResponse> {
-                override fun onResponse(
-                    call: Call<SaveScheduleResponse>,
-                    response: Response<SaveScheduleResponse>
-                ) {
-                    val body = response.body()
-
-                    if (response.isSuccessful && body?.success == true) {
-                        Toast.makeText(
-                            this@RegisterScheduleActivity,
-                            body.message ?: "시간표가 저장되었습니다.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        Toast.makeText(
-                            this@RegisterScheduleActivity,
-                            body?.message ?: "시간표 저장 실패, 임시 저장으로 이동합니다.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-
-                    moveToMain()
-                }
-
-                override fun onFailure(call: Call<SaveScheduleResponse>, t: Throwable) {
-                    Toast.makeText(
-                        this@RegisterScheduleActivity,
-                        "임시 시간표 저장 완료",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                    moveToMain()
-                }
-            })
-    }
-
-    private fun moveToMain() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
+        FirebaseClient.put("studentSchedules/$userId", body) {
+            Toast.makeText(this, "시간표가 저장되었습니다.", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
     }
 
     private fun getColumnWidth(): Int {
         val width = classBlockLayer.width
-
-        return if (width > 0) {
-            width / 5
-        } else {
-            val screenWidth = resources.displayMetrics.widthPixels
-            val horizontalPadding = dpToPx(24 + 24 + 18 + 8 + 28)
-            (screenWidth - horizontalPadding) / 5
-        }
+        return if (width > 0) width / 5 else (resources.displayMetrics.widthPixels - dpToPx(120)) / 5
     }
 
     private fun getLeftMarginByDay(day: String): Int {
         val columnWidth = getColumnWidth()
-
         return when (day) {
             "월" -> columnWidth * 0
             "화" -> columnWidth * 1
@@ -315,7 +197,6 @@ class RegisterScheduleActivity : Activity() {
 
     private fun getTopMarginByHour(hour: Int): Int {
         val oneHourHeight = dpToPx(52)
-
         return when (hour) {
             9 -> oneHourHeight * 0
             10 -> oneHourHeight * 1
@@ -328,26 +209,10 @@ class RegisterScheduleActivity : Activity() {
     }
 
     private fun getBlockHeight(startHour: Int, endHour: Int): Int {
-        val oneHourHeight = dpToPx(52)
-        return (endHour - startHour) * oneHourHeight
+        return (endHour - startHour) * dpToPx(52)
     }
 
     private fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
-    }
-
-    private fun extractHour(time: String): Int {
-        return time.substringBefore(":").toIntOrNull() ?: 9
-    }
-
-    private fun convertDayToKorean(day: String): String {
-        return when (day.uppercase()) {
-            "MON", "MONDAY", "월" -> "월"
-            "TUE", "TUESDAY", "화" -> "화"
-            "WED", "WEDNESDAY", "수" -> "수"
-            "THU", "THURSDAY", "목" -> "목"
-            "FRI", "FRIDAY", "금" -> "금"
-            else -> "월"
-        }
     }
 }
