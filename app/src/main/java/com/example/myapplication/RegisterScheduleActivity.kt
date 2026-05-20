@@ -10,7 +10,9 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
+import com.example.myapplication.model.Course
 import com.example.myapplication.model.CourseLookupResponse
+import com.example.myapplication.model.CourseTime
 import com.example.myapplication.model.SaveScheduleRequest
 import com.example.myapplication.model.SaveScheduleResponse
 import retrofit2.Call
@@ -30,6 +32,7 @@ class RegisterScheduleActivity : Activity() {
 
     private val mockCourseData = mapOf(
         "MOB001" to Course(
+            classId = 1001,
             code = "MOB001",
             name = "모바일프로그래밍 (영어강의)",
             professor = "민홍",
@@ -40,6 +43,7 @@ class RegisterScheduleActivity : Activity() {
             )
         ),
         "DATA001" to Course(
+            classId = 1002,
             code = "DATA001",
             name = "자료구조 및 실습 (영어강의)",
             professor = "김교수",
@@ -50,6 +54,7 @@ class RegisterScheduleActivity : Activity() {
             )
         ),
         "SW001" to Course(
+            classId = 1003,
             code = "SW001",
             name = "소프트웨어공학 (신기술화상강의)",
             professor = "박교수",
@@ -109,21 +114,15 @@ class RegisterScheduleActivity : Activity() {
                 ) {
                     val body = response.body()
 
-                    if (response.isSuccessful && body?.success == true) {
+                    if (response.isSuccessful && body?.success == true && body.course != null) {
                         val course = convertResponseToCourse(body, courseCode)
                         addCourseIfPossible(course)
                     } else {
-                        /*
-                         * 서버 응답은 왔지만 해당 코드가 없으면 기존 mock 데이터도 확인
-                         */
                         addMockCourseIfPossible(courseCode)
                     }
                 }
 
                 override fun onFailure(call: Call<CourseLookupResponse>, t: Throwable) {
-                    /*
-                     * 백엔드 서버 없을 때는 기존 mock 데이터 사용
-                     */
                     addMockCourseIfPossible(courseCode)
                 }
             })
@@ -133,15 +132,19 @@ class RegisterScheduleActivity : Activity() {
         body: CourseLookupResponse,
         inputCode: String
     ): Course {
-        val day = convertDayToKorean(body.dayOfWeek ?: "월")
-        val startHour = extractHour(body.startTime ?: "09:00")
-        val endHour = extractHour(body.endTime ?: "10:00")
+        val info = body.course
+            ?: throw IllegalArgumentException(body.message ?: "강의 정보를 찾을 수 없습니다.")
+
+        val day = convertDayToKorean(info.dayOfWeek)
+        val startHour = extractHour(info.startTime)
+        val endHour = extractHour(info.endTime)
 
         return Course(
-            code = body.courseCode ?: inputCode,
-            name = body.courseName ?: "수업명 없음",
-            professor = body.professorName ?: "교수명 없음",
-            classroom = body.room ?: "강의실 없음",
+            classId = info.classId,
+            code = info.courseCode.ifBlank { inputCode },
+            name = info.courseName.ifBlank { "수업명 없음" },
+            professor = info.professorName.ifBlank { "교수명 없음" },
+            classroom = info.room.ifBlank { "강의실 없음" },
             schedules = listOf(
                 CourseTime(
                     day = day,
@@ -183,7 +186,7 @@ class RegisterScheduleActivity : Activity() {
 
         addCourseToTimeTable(course)
 
-        Toast.makeText(this, course.name + " 수업이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "${course.name} 수업이 추가되었습니다.", Toast.LENGTH_SHORT).show()
     }
 
     private fun addCourseToTimeTable(course: Course) {
@@ -239,7 +242,7 @@ class RegisterScheduleActivity : Activity() {
 
     private fun saveScheduleToBackend(courses: List<Course>) {
         val request = SaveScheduleRequest(
-            courseCodes = courses.map { it.code }
+            classIds = courses.map { it.classId }
         )
 
         ApiClient.apiService.saveStudentSchedule(userId, request)
@@ -268,9 +271,6 @@ class RegisterScheduleActivity : Activity() {
                 }
 
                 override fun onFailure(call: Call<SaveScheduleResponse>, t: Throwable) {
-                    /*
-                     * 서버 없을 때도 프론트 테스트 가능하게 이동
-                     */
                     Toast.makeText(
                         this@RegisterScheduleActivity,
                         "임시 시간표 저장 완료",
@@ -351,17 +351,3 @@ class RegisterScheduleActivity : Activity() {
         }
     }
 }
-
-data class Course(
-    val code: String,
-    val name: String,
-    val professor: String,
-    val classroom: String,
-    val schedules: List<CourseTime>
-)
-
-data class CourseTime(
-    val day: String,
-    val startHour: Int,
-    val endHour: Int
-)
