@@ -14,19 +14,16 @@ class LoadingActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.loading)
 
-        FirebaseSeedData.seedIfAllowed()
-
         Handler(Looper.getMainLooper()).postDelayed({
-            val pref = getSharedPreferences("login_pref", MODE_PRIVATE)
-            val isAutoLogin = pref.getBoolean("auto_login", false)
+            val loginPref = getSharedPreferences("login_pref", MODE_PRIVATE)
+            val isAutoLogin = loginPref.getBoolean("auto_login", false)
+            val savedUserId = loginPref.getString("saved_user_id", null)
 
-            if (isAutoLogin) {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+            if (isAutoLogin && !savedUserId.isNullOrBlank()) {
+                startActivity(Intent(this, MainActivity::class.java))
                 finish()
             } else {
-                val intent = Intent(this, LoginActivity::class.java)
-                startActivity(intent)
+                startActivity(Intent(this, LoginActivity::class.java))
                 finish()
             }
         }, loadingTime)

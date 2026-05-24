@@ -105,7 +105,6 @@
                     android:textColor="#999999"
                     android:textSize="18sp" />
 
-                <!-- 일 -->
                 <LinearLayout
                     android:id="@+id/dateSun"
                     android:layout_width="0dp"
@@ -133,7 +132,6 @@
                         android:textSize="18sp" />
                 </LinearLayout>
 
-                <!-- 월 -->
                 <LinearLayout
                     android:id="@+id/dateMon"
                     android:layout_width="0dp"
@@ -159,7 +157,6 @@
                         android:textSize="18sp" />
                 </LinearLayout>
 
-                <!-- 화 선택된 날짜 -->
                 <LinearLayout
                     android:id="@+id/dateTue"
                     android:layout_width="0dp"
@@ -186,7 +183,6 @@
                         android:textSize="18sp" />
                 </LinearLayout>
 
-                <!-- 수 -->
                 <LinearLayout
                     android:id="@+id/dateWed"
                     android:layout_width="0dp"
@@ -212,7 +208,6 @@
                         android:textSize="18sp" />
                 </LinearLayout>
 
-                <!-- 목 -->
                 <LinearLayout
                     android:id="@+id/dateThu"
                     android:layout_width="0dp"
@@ -238,7 +233,6 @@
                         android:textSize="18sp" />
                 </LinearLayout>
 
-                <!-- 금: 결석/지각 있는 날짜 -->
                 <LinearLayout
                     android:id="@+id/dateFri"
                     android:layout_width="0dp"
@@ -265,7 +259,6 @@
                         android:textSize="18sp" />
                 </LinearLayout>
 
-                <!-- 토 -->
                 <LinearLayout
                     android:id="@+id/dateSat"
                     android:layout_width="0dp"
@@ -340,7 +333,8 @@
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/bg_attendance_item"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingEnd="23dp">
 
                 <View
                     android:layout_width="8dp"
@@ -382,14 +376,13 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvStatusIcon1"
+                <ImageView
+                    android:id="@+id/ivStatusIcon1"
                     android:layout_width="42dp"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="×"
-                    android:textColor="#D60000"
-                    android:textSize="30sp" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/absentweek"
+                    android:contentDescription="결석 아이콘" />
             </LinearLayout>
 
             <!-- 아이템 2 출석 -->
@@ -400,7 +393,8 @@
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/bg_attendance_item"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingEnd="23dp">
 
                 <View
                     android:layout_width="8dp"
@@ -424,7 +418,7 @@
                         android:layout_height="wrap_content" />
 
                     <TextView
-                        android:text="◷ 12:00 ~ 12:50"
+                        android:text="12:00 ~ 12:50"
                         android:textColor="#666666"
                         android:textSize="11sp"
                         android:layout_width="wrap_content"
@@ -439,13 +433,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <TextView
+                <ImageView
+                    android:id="@+id/ivStatusIcon2"
                     android:layout_width="42dp"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="○"
-                    android:textColor="#004B83"
-                    android:textSize="30sp" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/attendanceweek"
+                    android:contentDescription="출석 아이콘" />
             </LinearLayout>
 
             <!-- 아이템 3 출석 -->
@@ -456,7 +450,8 @@
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/bg_attendance_item"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingEnd="23dp">
 
                 <View
                     android:layout_width="8dp"
@@ -480,7 +475,7 @@
                         android:layout_height="wrap_content" />
 
                     <TextView
-                        android:text="◷ 12:00 ~ 12:50"
+                        android:text="12:00 ~ 12:50"
                         android:textColor="#666666"
                         android:textSize="11sp"
                         android:layout_width="wrap_content"
@@ -495,13 +490,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <TextView
+                <ImageView
+                    android:id="@+id/ivStatusIcon3"
                     android:layout_width="42dp"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="○"
-                    android:textColor="#004B83"
-                    android:textSize="30sp" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/attendanceweek"
+                    android:contentDescription="출석 아이콘" />
             </LinearLayout>
 
             <!-- 아이템 4 지각 -->
@@ -512,7 +507,8 @@
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/bg_attendance_item"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingEnd="23dp">
 
                 <View
                     android:layout_width="8dp"
@@ -535,8 +531,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 
+
                     <TextView
-                        android:text="◷ 12:00 ~ 12:50"
+                        android:text="12:00 ~ 12:50"
                         android:textColor="#666666"
                         android:textSize="11sp"
                         android:layout_width="wrap_content"
@@ -551,14 +548,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <TextView
+                <ImageView
+                    android:id="@+id/ivStatusIcon4"
                     android:layout_width="42dp"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="!"
-                    android:textColor="#9C00B8"
-                    android:textSize="30sp"
-                    android:textStyle="bold" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/lateweek"
+                    android:contentDescription="지각 아이콘" />
             </LinearLayout>
 
             <!-- 아이템 5 출석 -->
@@ -568,7 +564,8 @@
                 android:layout_height="48dp"
                 android:background="@drawable/bg_attendance_item"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingEnd="23dp">
 
                 <View
                     android:layout_width="8dp"
@@ -592,7 +589,7 @@
                         android:layout_height="wrap_content" />
 
                     <TextView
-                        android:text="◷ 12:00 ~ 12:50"
+                        android:text="12:00 ~ 12:50"
                         android:textColor="#666666"
                         android:textSize="11sp"
                         android:layout_width="wrap_content"
@@ -607,13 +604,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <TextView
+                <ImageView
+                    android:id="@+id/ivStatusIcon5"
                     android:layout_width="42dp"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="○"
-                    android:textColor="#004B83"
-                    android:textSize="30sp" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/attendanceweek"
+                    android:contentDescription="출석 아이콘" />
             </LinearLayout>
 
         </LinearLayout>

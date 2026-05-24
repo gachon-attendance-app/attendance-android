@@ -382,14 +382,13 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvStatusIcon1"
+                <ImageView
+                    android:id="@+id/ivStatusIcon1"
                     android:layout_width="42dp"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="×"
-                    android:textColor="#D60000"
-                    android:textSize="30sp" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/absentweek"
+                    android:contentDescription="결석 아이콘" />
             </LinearLayout>
 
             <!-- 아이템 2 출석 - 펼쳐진 상태 -->
@@ -458,15 +457,13 @@
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/tvStatusIcon2"
+                        <ImageView
+                            android:id="@+id/ivStatusIcon2"
                             android:layout_width="42dp"
                             android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="○"
-                            android:textColor="#004B83"
-                            android:textSize="30sp" />
-                    </LinearLayout>
+                            android:scaleType="centerInside"
+                            android:src="@drawable/attendanceweek"
+                            android:contentDescription="출석 아이콘" />                   </LinearLayout>
 
                     <!-- 구분선 -->
                     <View
@@ -605,13 +602,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <TextView
+                <ImageView
+                    android:id="@+id/ivStatusIcon3"
                     android:layout_width="42dp"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="○"
-                    android:textColor="#004B83"
-                    android:textSize="30sp" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/attendanceweek"
+                    android:contentDescription="출석 아이콘" />
             </LinearLayout>
 
             <!-- 아이템 4 지각 -->
@@ -661,14 +658,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <TextView
+                <ImageView
+                    android:id="@+id/ivStatusIcon4"
                     android:layout_width="42dp"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="!"
-                    android:textColor="#9C00B8"
-                    android:textSize="30sp"
-                    android:textStyle="bold" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/lateweek"
+                    android:contentDescription="지각 아이콘" />
             </LinearLayout>
 
             <!-- 아이템 5 출석 -->
@@ -717,13 +713,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <TextView
+                <ImageView
+                    android:id="@+id/ivStatusIcon5"
                     android:layout_width="42dp"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="○"
-                    android:textColor="#004B83"
-                    android:textSize="30sp" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/attendanceweek"
+                    android:contentDescription="출석 아이콘" />
             </LinearLayout>
 
         </LinearLayout>

@@ -417,21 +417,8 @@ private const val BASE_URL = "http://10.0.2.2:8080/"
 
 백엔드 서버 연결 전 임시 테스트용.
 
-### 학생
 
-```text
-ID: test
-PW: 1234
-```
-
-### 교수
-
-```text
-ID: professor
-PW: 1234
-```
-
----
+``
 
 ## Git 작업
 

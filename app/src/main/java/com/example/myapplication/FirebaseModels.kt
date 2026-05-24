@@ -4,39 +4,52 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * users/{loginId}
- * - 로그인/마이페이지 사용자 정보
+ * Users/{userId}
+ * - userId: 학번
+ * - portalID: 포털 ID
+ * - userType: STUDENT / PROFESSOR
  */
 data class AppUser(
-    val userId: Int,
-    val loginId: String,
+    val userId: String,
+    val portalId: String,
     val password: String,
     val name: String,
-    val role: String,
-    val department: String,
-    val studentNumber: String?,
-    val professorNumber: String?
+    val email: String?,
+    val userType: String
 )
 
 /**
- * courses/{courseCode}
- * - Firebase 강의 데이터
+ * Subjects/{subjectCode}
+ * - 강의 정보
  */
-data class FirebaseCourse(
-    val classId: Int,
-    val courseCode: String,
-    val courseName: String,
+data class Subject(
+    val subjectCode: String,
+    val subjectName: String,
     val professorName: String,
-    val dayOfWeek: String,
-    val startTime: String,
-    val endTime: String,
-    val room: String,
-    val semester: String?
+    val schedules: List<SubjectSchedule>
 )
 
 /**
- * register_schedule.xml
- * - 시간표 블록 요일/시간
+ * Subjects/{subjectCode}/schedule/dayN
+ * - 요일별 시간표 정보
+ */
+data class SubjectSchedule(
+    val dayOfWeek: String,
+    val location: String,
+    val periods: List<SubjectPeriod>
+)
+
+/**
+ * Subjects/{subjectCode}/schedule/dayN/periods
+ * - 교시별 시작/종료 시간
+ */
+data class SubjectPeriod(
+    val startTime: String,
+    val endTime: String
+)
+
+/**
+ * 시간표 블록 표시용
  */
 data class CourseTime(
     val day: String,
@@ -46,10 +59,9 @@ data class CourseTime(
 
 /**
  * register_schedule.xml, schedule_1.xml
- * - 앱 내부 시간표 수업 데이터
+ * - 앱 화면 표시용 수업 데이터
  */
 data class Course(
-    val classId: Int,
     val code: String,
     val name: String,
     val professor: String,
@@ -57,237 +69,146 @@ data class Course(
     val schedules: List<CourseTime>
 )
 
-/**
- * currentClasses/{userId}
- * - main1.xml 현재 수업 정보
- */
-data class CurrentClassData(
-    val success: Boolean,
-    val hasClass: Boolean,
-    val classId: Int,
-    val courseCode: String,
-    val courseName: String,
-    val professorName: String,
-    val room: String,
-    val startTime: String,
-    val endTime: String,
-    val attendanceStatus: String,
-    val attendanceMessage: String,
-    val sessionId: Int
-)
-
-/**
- * professorAttendanceStatus/{classId}
- * - main_p_1.xml 학생별 출석 상태
- */
-data class StudentAttendance(
-    val studentId: String,
-    val name: String,
-    val status: String
-)
-
-/**
- * Firebase JSON 변환 함수 모음
- */
 object FirebaseParsers {
 
-    fun user(json: JSONObject?, fallbackLoginId: String = "test"): AppUser? {
+    fun user(json: JSONObject?, key: String): AppUser? {
         if (json == null) return null
 
         return AppUser(
-            userId = json.optInt("userId", if (fallbackLoginId == "professor") 2 else 1),
-            loginId = json.optString("loginId", fallbackLoginId),
-            password = json.optString("password", "1234"),
-            name = json.optString(
-                "name",
-                if (fallbackLoginId == "professor") "테스트교수" else "테스트학생"
-            ),
-            role = json.optString(
-                "role",
-                if (fallbackLoginId == "professor") "professor" else "student"
-            ),
-            department = json.optString("department", "소프트웨어학과"),
-            studentNumber = json.optStringOrNull("studentNumber"),
-            professorNumber = json.optStringOrNull("professorNumber")
+            userId = json.optString("userId", key),
+            portalId = json.optString("portalID", ""),
+            password = json.optString("password", ""),
+            name = json.optString("name", ""),
+            email = json.optStringOrNull("email"),
+            userType = json.optString("userType", "STUDENT")
         )
     }
 
-    fun course(json: JSONObject?, inputCode: String): Course? {
+    fun findUserByPortalId(usersJson: JSONObject?, portalId: String): AppUser? {
+        if (usersJson == null) return null
+
+        val keys = usersJson.keys()
+
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val userJson = usersJson.optJSONObject(key) ?: continue
+            val user = user(userJson, key) ?: continue
+
+            if (user.portalId == portalId) {
+                return user
+            }
+        }
+
+        return null
+    }
+
+    fun subject(json: JSONObject?, fallbackCode: String): Subject? {
         if (json == null) return null
 
-        val courseCode = json.optString("courseCode", inputCode)
-        val times = json.optJSONArray("courseTimes")
+        val scheduleObject = json.optJSONObject("schedule")
+        val schedules = mutableListOf<SubjectSchedule>()
 
-        val schedules = if (times != null && times.length() > 0) {
-            val list = mutableListOf<CourseTime>()
+        if (scheduleObject != null) {
+            val dayKeys = scheduleObject.keys()
 
-            for (i in 0 until times.length()) {
-                val item = times.optJSONObject(i) ?: continue
+            while (dayKeys.hasNext()) {
+                val dayKey = dayKeys.next()
+                val dayObject = scheduleObject.optJSONObject(dayKey) ?: continue
+                val periodsArray = dayObject.optJSONArray("periods")
+                val periods = mutableListOf<SubjectPeriod>()
 
-                list.add(
-                    CourseTime(
-                        day = item.optString(
-                            "day",
-                            convertDayToKorean(json.optString("dayOfWeek", "월"))
-                        ),
-                        startHour = item.optInt(
-                            "startHour",
-                            extractHour(json.optString("startTime", "09:00"))
-                        ),
-                        endHour = item.optInt(
-                            "endHour",
-                            extractHour(json.optString("endTime", "10:00"))
+                if (periodsArray != null) {
+                    for (i in 0 until periodsArray.length()) {
+                        val periodObject = periodsArray.optJSONObject(i) ?: continue
+                        periods.add(
+                            SubjectPeriod(
+                                startTime = periodObject.optString("startTime", ""),
+                                endTime = periodObject.optString("endTime", "")
+                            )
                         )
+                    }
+                }
+
+                schedules.add(
+                    SubjectSchedule(
+                        dayOfWeek = dayObject.optString("dayOfWeek", ""),
+                        location = dayObject.optString("location", ""),
+                        periods = periods
                     )
                 )
             }
-
-            list
-        } else {
-            listOf(
-                CourseTime(
-                    day = convertDayToKorean(json.optString("dayOfWeek", "월")),
-                    startHour = extractHour(json.optString("startTime", "09:00")),
-                    endHour = extractHour(json.optString("endTime", "10:00"))
-                )
-            )
         }
 
-        return Course(
-            classId = json.optInt("classId", 0),
-            code = courseCode,
-            name = json.optString("courseName", "수업명 없음"),
-            professor = json.optString("professorName", "교수명 없음"),
-            classroom = json.optString("room", "강의실 없음"),
+        return Subject(
+            subjectCode = json.optString("subjectCode", fallbackCode),
+            subjectName = json.optString("subjectName", ""),
+            professorName = json.optString("professorName", ""),
             schedules = schedules
         )
     }
 
-    fun courseList(json: JSONObject?): List<Course> {
-        if (json == null) return emptyList()
+    fun subjectToCourse(subject: Subject): Course {
+        val courseTimes = mutableListOf<CourseTime>()
+        var classroom = ""
 
-        val array = json.optJSONArray("classes") ?: return emptyList()
-        return jsonArrayToCourseList(array)
-    }
+        subject.schedules.forEach { schedule ->
+            if (classroom.isBlank()) {
+                classroom = schedule.location
+            }
 
-    fun jsonArrayToCourseList(array: JSONArray): List<Course> {
-        val result = mutableListOf<Course>()
+            val startHour = schedule.periods.firstOrNull()?.startTime?.substringBefore(":")?.toIntOrNull()
+            val endHour = schedule.periods.lastOrNull()?.endTime?.substringBefore(":")?.toIntOrNull()
 
-        for (i in 0 until array.length()) {
-            val item = array.optJSONObject(i) ?: continue
-            val code = item.optString("courseCode", "")
-
-            course(item, code)?.let { result.add(it) }
+            if (startHour != null && endHour != null) {
+                courseTimes.add(
+                    CourseTime(
+                        day = convertDayToKorean(schedule.dayOfWeek),
+                        startHour = startHour,
+                        endHour = endHour + 1
+                    )
+                )
+            }
         }
 
-        return result
-    }
-
-    fun currentClass(json: JSONObject?): CurrentClassData? {
-        if (json == null) {
-            return CurrentClassData(
-                success = true,
-                hasClass = true,
-                classId = 10,
-                courseCode = "MOB001",
-                courseName = "모바일프로그래밍 (영어강의)",
-                professorName = "민홍",
-                room = "AI관-301",
-                startTime = "14:00",
-                endTime = "15:00",
-                attendanceStatus = "NOT_STARTED",
-                attendanceMessage = "출석 전",
-                sessionId = 100
-            )
-        }
-
-        return CurrentClassData(
-            success = json.optBoolean("success", true),
-            hasClass = json.optBoolean("hasClass", true),
-            classId = json.optInt("classId", 10),
-            courseCode = json.optString("courseCode", "MOB001"),
-            courseName = json.optString("courseName", "모바일프로그래밍 (영어강의)"),
-            professorName = json.optString("professorName", "민홍"),
-            room = json.optString("room", "AI관-301"),
-            startTime = json.optString("startTime", "14:00"),
-            endTime = json.optString("endTime", "15:00"),
-            attendanceStatus = json.optString("attendanceStatus", "NOT_STARTED"),
-            attendanceMessage = json.optString("attendanceMessage", "출석 전"),
-            sessionId = json.optInt("sessionId", 100)
+        return Course(
+            code = subject.subjectCode,
+            name = subject.subjectName,
+            professor = subject.professorName,
+            classroom = classroom,
+            schedules = courseTimes
         )
     }
 
-    fun studentAttendanceList(json: JSONObject?): List<StudentAttendance> {
-        val array = json?.optJSONArray("students") ?: return emptyList()
-        val result = mutableListOf<StudentAttendance>()
-
-        for (i in 0 until array.length()) {
-            val item = array.optJSONObject(i) ?: continue
-
-            result.add(
-                StudentAttendance(
-                    studentId = item.optString("studentId", ""),
-                    name = item.optString("name", ""),
-                    status = item.optString("status", "NOT_STARTED")
-                )
-            )
+    fun attendanceStatusToKorean(status: String): String {
+        return when (status) {
+            "PRESENT", "출석" -> "출석"
+            "LATE", "지각" -> "지각"
+            "ABSENT", "결석" -> "결석"
+            "NOT_STARTED", "출석 전" -> "출석 전"
+            else -> status
         }
-
-        return result
-    }
-
-    fun courseToJson(course: Course): JSONObject {
-        val times = JSONArray()
-
-        course.schedules.forEach { time ->
-            times.put(
-                JSONObject()
-                    .put("day", time.day)
-                    .put("startHour", time.startHour)
-                    .put("endHour", time.endHour)
-            )
-        }
-
-        return JSONObject()
-            .put("classId", course.classId)
-            .put("courseCode", course.code)
-            .put("courseName", course.name)
-            .put("professorName", course.professor)
-            .put("room", course.classroom)
-            .put("courseTimes", times)
-            .put("semester", "2026-1")
-    }
-
-    fun courseListToJson(courses: List<Course>): JSONArray {
-        val array = JSONArray()
-
-        courses.forEach { course ->
-            array.put(courseToJson(course))
-        }
-
-        return array
     }
 
     fun JSONObject.optStringOrNull(name: String): String? {
-        return if (has(name) && !isNull(name)) {
-            optString(name)
-        } else {
-            null
-        }
+        return if (has(name) && !isNull(name)) optString(name) else null
     }
 
     fun convertDayToKorean(day: String): String {
-        return when (day.uppercase()) {
-            "MON", "MONDAY", "월" -> "월"
-            "TUE", "TUESDAY", "화" -> "화"
-            "WED", "WEDNESDAY", "수" -> "수"
-            "THU", "THURSDAY", "목" -> "목"
-            "FRI", "FRIDAY", "금" -> "금"
+        return when (day.lowercase()) {
+            "monday", "mon", "월" -> "월"
+            "tuesday", "tue", "화" -> "화"
+            "wednesday", "wed", "수" -> "수"
+            "thursday", "thu", "목" -> "목"
+            "friday", "fri", "금" -> "금"
             else -> "월"
         }
     }
 
-    fun extractHour(time: String): Int {
-        return time.substringBefore(":").toIntOrNull() ?: 9
+    fun JSONObject.toPrettyStringSafe(): String {
+        return try {
+            toString(2)
+        } catch (e: Exception) {
+            toString()
+        }
     }
 }

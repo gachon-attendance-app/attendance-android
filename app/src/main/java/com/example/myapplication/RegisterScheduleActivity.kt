@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
-import org.json.JSONObject
 
 class RegisterScheduleActivity : Activity() {
 
@@ -20,48 +19,14 @@ class RegisterScheduleActivity : Activity() {
     private lateinit var classBlockLayer: FrameLayout
 
     private val selectedCourses = mutableListOf<Course>()
-    private var userId: Int = 1
-
-    private val localCourseData = mapOf(
-        "MOB001" to Course(
-            classId = 10,
-            code = "MOB001",
-            name = "모바일프로그래밍 (영어강의)",
-            professor = "민홍",
-            classroom = "AI관-301",
-            schedules = listOf(
-                CourseTime(day = "화", startHour = 14, endHour = 15),
-                CourseTime(day = "목", startHour = 13, endHour = 15)
-            )
-        ),
-        "DATA001" to Course(
-            classId = 11,
-            code = "DATA001",
-            name = "자료구조 및 실습 (영어강의)",
-            professor = "김교수",
-            classroom = "AI관-511",
-            schedules = listOf(
-                CourseTime(day = "화", startHour = 10, endHour = 11),
-                CourseTime(day = "목", startHour = 10, endHour = 12)
-            )
-        ),
-        "SW001" to Course(
-            classId = 12,
-            code = "SW001",
-            name = "소프트웨어공학 (신기술화상강의)",
-            professor = "박교수",
-            classroom = "화상강의실",
-            schedules = listOf(
-                CourseTime(day = "금", startHour = 10, endHour = 12)
-            )
-        )
-    )
+    private var userId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.register_schedule)
 
-        userId = getSharedPreferences("LOGIN_INFO", MODE_PRIVATE).getInt("userId", 1)
+        userId = getSharedPreferences("LOGIN_INFO", MODE_PRIVATE)
+            .getString("userId", "") ?: ""
 
         etCourseCode = findViewById(R.id.etCourseCode)
         btnAddClass = findViewById(R.id.btnAddClass)
@@ -69,14 +34,14 @@ class RegisterScheduleActivity : Activity() {
         classBlockLayer = findViewById(R.id.classBlockLayer)
 
         btnAddClass.setOnClickListener {
-            val inputCode = etCourseCode.text.toString().trim().uppercase()
+            val inputCode = etCourseCode.text.toString().trim()
 
             if (inputCode.isEmpty()) {
                 Toast.makeText(this, "과목 코드를 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            lookupCourse(inputCode)
+            lookupSubject(inputCode)
         }
 
         btnConfirmSchedule.setOnClickListener {
@@ -85,24 +50,20 @@ class RegisterScheduleActivity : Activity() {
                 return@setOnClickListener
             }
 
-            saveScheduleToFirebase()
+            saveEnrollment()
         }
     }
 
-    private fun lookupCourse(courseCode: String) {
-        FirebaseClient.get("courses/$courseCode") { json ->
-            val firebaseCourse = FirebaseParsers.course(json, courseCode)
-            val course = firebaseCourse ?: localCourseData[courseCode]
+    private fun lookupSubject(subjectCode: String) {
+        FirebaseClient.get("Subjects/$subjectCode") { json ->
+            val subject = FirebaseParsers.subject(json, subjectCode)
 
-            if (course == null) {
-                Toast.makeText(
-                    this,
-                    "등록되지 않은 과목 코드입니다. 테스트 코드: MOB001, DATA001, SW001",
-                    Toast.LENGTH_LONG
-                ).show()
+            if (subject == null) {
+                Toast.makeText(this, "등록되지 않은 과목 코드입니다.", Toast.LENGTH_SHORT).show()
                 return@get
             }
 
+            val course = FirebaseParsers.subjectToCourse(subject)
             addCourseIfPossible(course)
         }
     }
@@ -120,8 +81,38 @@ class RegisterScheduleActivity : Activity() {
 
         selectedCourses.add(course)
         etCourseCode.text.clear()
+
         addCourseToTimeTable(course)
+
         Toast.makeText(this, course.name + " 수업이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun saveEnrollment() {
+        if (userId.isBlank()) {
+            Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        saveNextEnrollment(0)
+    }
+
+    private fun saveNextEnrollment(index: Int) {
+        if (index >= selectedCourses.size) {
+            Toast.makeText(this, "시간표가 저장되었습니다.", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
+        val course = selectedCourses[index]
+
+        FirebaseClient.put("Enrollment/$userId/${course.code}", org.json.JSONObject().put("value", true)) {
+            FirebaseClient.put("Enrollment/$userId/${course.code}", org.json.JSONObject.NULL as? org.json.JSONObject ?: org.json.JSONObject()) {
+                FirebaseClient.putRawBoolean("Enrollment/$userId/${course.code}", true) {
+                    saveNextEnrollment(index + 1)
+                }
+            }
+        }
     }
 
     private fun addCourseToTimeTable(course: Course) {
@@ -145,6 +136,7 @@ class RegisterScheduleActivity : Activity() {
 
             params.leftMargin = getLeftMarginByDay(time.day)
             params.topMargin = getTopMarginByHour(time.startHour)
+
             classBlockLayer.addView(block, params)
         }
     }
@@ -157,34 +149,31 @@ class RegisterScheduleActivity : Activity() {
                     val overlap = selectedTime.startHour < newTime.endHour &&
                             newTime.startHour < selectedTime.endHour
 
-                    if (sameDay && overlap) return true
+                    if (sameDay && overlap) {
+                        return true
+                    }
                 }
             }
         }
+
         return false
-    }
-
-    private fun saveScheduleToFirebase() {
-        val body = JSONObject()
-            .put("success", true)
-            .put("studentId", userId)
-            .put("classes", FirebaseParsers.courseListToJson(selectedCourses))
-            .put("message", "시간표 저장 성공")
-
-        FirebaseClient.put("studentSchedules/$userId", body) {
-            Toast.makeText(this, "시간표가 저장되었습니다.", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
     }
 
     private fun getColumnWidth(): Int {
         val width = classBlockLayer.width
-        return if (width > 0) width / 5 else (resources.displayMetrics.widthPixels - dpToPx(120)) / 5
+
+        return if (width > 0) {
+            width / 5
+        } else {
+            val screenWidth = resources.displayMetrics.widthPixels
+            val horizontalPadding = dpToPx(24 + 24 + 18 + 8 + 28)
+            (screenWidth - horizontalPadding) / 5
+        }
     }
 
     private fun getLeftMarginByDay(day: String): Int {
         val columnWidth = getColumnWidth()
+
         return when (day) {
             "월" -> columnWidth * 0
             "화" -> columnWidth * 1
@@ -197,6 +186,7 @@ class RegisterScheduleActivity : Activity() {
 
     private fun getTopMarginByHour(hour: Int): Int {
         val oneHourHeight = dpToPx(52)
+
         return when (hour) {
             9 -> oneHourHeight * 0
             10 -> oneHourHeight * 1
@@ -204,12 +194,14 @@ class RegisterScheduleActivity : Activity() {
             12 -> oneHourHeight * 3
             13 -> oneHourHeight * 4
             14 -> oneHourHeight * 5
+            15 -> oneHourHeight * 6
+            16 -> oneHourHeight * 7
             else -> 0
         }
     }
 
     private fun getBlockHeight(startHour: Int, endHour: Int): Int {
-        return (endHour - startHour) * dpToPx(52)
+        return ((endHour - startHour).coerceAtLeast(1)) * dpToPx(52)
     }
 
     private fun dpToPx(dp: Int): Int {

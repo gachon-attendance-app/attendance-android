@@ -9,34 +9,35 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
-/**
- * Firebase REST 통신.
- * Firebase SDK 없이 Realtime Database URL 직접 호출.
- */
 object FirebaseClient {
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
     fun get(path: String, callback: (JSONObject?) -> Unit) {
-        request(method = "GET", path = path, body = null, callback = callback)
+        request("GET", path, null, callback)
     }
 
     fun put(path: String, body: JSONObject, callback: (JSONObject?) -> Unit = {}) {
-        request(method = "PUT", path = path, body = body, callback = callback)
+        request("PUT", path, body.toString(), callback)
     }
 
     fun patch(path: String, body: JSONObject, callback: (JSONObject?) -> Unit = {}) {
-        request(method = "PATCH", path = path, body = body, callback = callback)
+        request("PATCH", path, body.toString(), callback)
+    }
+
+    fun putRawBoolean(path: String, value: Boolean, callback: (JSONObject?) -> Unit = {}) {
+        request("PUT", path, value.toString(), callback)
     }
 
     private fun request(
         method: String,
         path: String,
-        body: JSONObject?,
+        bodyText: String?,
         callback: (JSONObject?) -> Unit
     ) {
         Thread {
             var connection: HttpURLConnection? = null
+
             try {
                 val cleanPath = path.trim().trim('/')
                 val urlText = if (cleanPath.isEmpty()) {
@@ -52,32 +53,41 @@ object FirebaseClient {
                 connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
                 connection.setRequestProperty("Accept", "application/json")
 
-                if (body != null) {
+                if (bodyText != null) {
                     connection.doOutput = true
-                    OutputStreamWriter(connection.outputStream, Charsets.UTF_8).use { writer ->
-                        writer.write(body.toString())
-                        writer.flush()
+                    OutputStreamWriter(connection.outputStream, Charsets.UTF_8).use {
+                        it.write(bodyText)
+                        it.flush()
                     }
                 }
 
-                val code = connection.responseCode
-                val stream = if (code in 200..299) connection.inputStream else connection.errorStream
-                val response = stream?.let {
+                val responseCode = connection.responseCode
+                val stream = if (responseCode in 200..299) {
+                    connection.inputStream
+                } else {
+                    connection.errorStream
+                }
+
+                val responseText = stream?.let {
                     BufferedReader(InputStreamReader(it, Charsets.UTF_8)).use { reader ->
                         reader.readText()
                     }
                 }.orEmpty()
 
                 val json = when {
-                    response.isBlank() -> null
-                    response == "null" -> null
-                    response.trim().startsWith("{") -> JSONObject(response)
-                    else -> JSONObject().put("value", response)
+                    responseText.isBlank() -> null
+                    responseText.trim() == "null" -> null
+                    responseText.trim().startsWith("{") -> JSONObject(responseText)
+                    else -> JSONObject().put("value", responseText)
                 }
 
-                mainHandler.post { callback(json) }
+                mainHandler.post {
+                    callback(json)
+                }
             } catch (e: Exception) {
-                mainHandler.post { callback(null) }
+                mainHandler.post {
+                    callback(null)
+                }
             } finally {
                 connection?.disconnect()
             }

@@ -8,7 +8,6 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 
 class LoginActivity : Activity() {
 
@@ -20,46 +19,14 @@ class LoginActivity : Activity() {
     private lateinit var btnLogin: Button
     private lateinit var tvSignup: TextView
 
-    private val localUsers = mapOf(
-        "test" to AppUser(
-            userId = 1,
-            loginId = "test",
-            password = "1234",
-            name = "테스트학생",
-            role = "student",
-            department = "소프트웨어학과",
-            studentNumber = "202312345",
-            professorNumber = null
-        ),
-        "202312345" to AppUser(
-            userId = 1,
-            loginId = "202312345",
-            password = "1234",
-            name = "최은수",
-            role = "student",
-            department = "소프트웨어학과",
-            studentNumber = "202312345",
-            professorNumber = null
-        ),
-        "professor" to AppUser(
-            userId = 2,
-            loginId = "professor",
-            password = "1234",
-            name = "테스트교수",
-            role = "professor",
-            department = "소프트웨어학과",
-            studentNumber = null,
-            professorNumber = "P001"
-        )
-    )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val loginPref = getSharedPreferences("login_pref", MODE_PRIVATE)
         val isAutoLogin = loginPref.getBoolean("auto_login", false)
+        val savedUserId = loginPref.getString("saved_user_id", null)
 
-        if (isAutoLogin) {
+        if (isAutoLogin && !savedUserId.isNullOrBlank()) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
@@ -106,55 +73,98 @@ class LoginActivity : Activity() {
             return
         }
 
-        FirebaseClient.get("users/$inputId") { json ->
-            val firebaseUser = FirebaseParsers.user(json, inputId)
-            val user = firebaseUser ?: localUsers[inputId]
+        // 테스트용 로그인 계정
+        // 아이디: gachon1
+        // 비밀번호: 1111
+        if (inputId == "gachon1") {
+            val testUser = AppUser(
+                userId = "202234920",
+                portalId = "gachon1",
+                password = "1111",
+                name = "이원희",
+                email = "gmr850@gachon.ac.kr",
+                userType = "STUDENT"
+            )
 
-            if (user == null) {
-                tvIdError.visibility = View.VISIBLE
-                tvIdError.text = "입력하신 아이디를 찾을 수 없습니다"
+            checkPasswordAndMove(testUser, inputPw)
+            return
+        }
+
+        // 테스트용 학번 로그인도 가능하게 추가
+        // 아이디: 202234920
+        // 비밀번호: 1111
+        if (inputId == "202234920") {
+            val testUser = AppUser(
+                userId = "202234920",
+                portalId = "gachon1",
+                password = "1111",
+                name = "이원희",
+                email = "gmr850@gachon.ac.kr",
+                userType = "STUDENT"
+            )
+
+            checkPasswordAndMove(testUser, inputPw)
+            return
+        }
+
+        // Firebase 로그인
+        FirebaseClient.get("Users/$inputId") { directJson ->
+            val directUser = FirebaseParsers.user(directJson, inputId)
+
+            if (directUser != null) {
+                checkPasswordAndMove(directUser, inputPw)
                 return@get
             }
 
-            if (inputPw != user.password) {
-                tvPwError.visibility = View.VISIBLE
-                tvPwError.text = "비밀번호가 올바르지 않습니다"
-                return@get
+            FirebaseClient.get("Users") { usersJson ->
+                val portalUser = FirebaseParsers.findUserByPortalId(usersJson, inputId)
+
+                if (portalUser == null) {
+                    tvIdError.visibility = View.VISIBLE
+                    tvIdError.text = "입력하신 아이디를 찾을 수 없습니다"
+                    return@get
+                }
+
+                checkPasswordAndMove(portalUser, inputPw)
             }
-
-            saveLoginInfo(user)
-            Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
-
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
         }
     }
 
+    private fun checkPasswordAndMove(user: AppUser, inputPw: String) {
+        if (inputPw != user.password) {
+            tvPwError.visibility = View.VISIBLE
+            tvPwError.text = "비밀번호가 올바르지 않습니다"
+            return
+        }
+
+        saveLoginInfo(user)
+
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
+    }
+
     private fun saveLoginInfo(user: AppUser) {
-        val rolePref = getSharedPreferences("LOGIN_INFO", MODE_PRIVATE)
-        rolePref.edit()
-            .putInt("userId", user.userId)
-            .putString("loginId", user.loginId)
+        getSharedPreferences("LOGIN_INFO", MODE_PRIVATE)
+            .edit()
+            .putString("userId", user.userId)
+            .putString("portalId", user.portalId)
             .putString("userName", user.name)
-            .putString("userRole", user.role)
-            .putString("department", user.department)
-            .putString("studentNumber", user.studentNumber)
-            .putString("professorNumber", user.professorNumber)
+            .putString("userEmail", user.email)
+            .putString("userRole", user.userType.lowercase())
             .apply()
 
-        val loginPref = getSharedPreferences("login_pref", MODE_PRIVATE)
+        val loginPrefEditor = getSharedPreferences("login_pref", MODE_PRIVATE).edit()
+
         if (cbAutoLogin.isChecked) {
-            loginPref.edit()
+            loginPrefEditor
                 .putBoolean("auto_login", true)
-                .putString("saved_id", user.loginId)
-                .putString("saved_role", user.role)
-                .apply()
+                .putString("saved_user_id", user.userId)
         } else {
-            loginPref.edit()
+            loginPrefEditor
                 .putBoolean("auto_login", false)
-                .remove("saved_id")
-                .remove("saved_role")
-                .apply()
+                .remove("saved_user_id")
         }
+
+        loginPrefEditor.apply()
     }
 }
