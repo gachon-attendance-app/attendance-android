@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -729,14 +730,39 @@ class MainActivity : Activity() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(12, 10, 12, 10)
+            setPadding(dpToPx(0), dpToPx(8), dpToPx(0), dpToPx(8))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dpToPx(38)
+            )
         }
 
-        row.addView(makeRowText(studentId, 1f))
-        row.addView(makeRowText(name, 1f))
-        row.addView(makeRowText(if (status == "출석") "○" else "", 1f))
-        row.addView(makeRowText(if (status == "결석" || status == "미출석") "○" else "", 1f))
-        row.addView(makeRowText(if (status == "지각") "○" else "", 1f))
+        row.addView(makeRowText(studentId, 1.45f))
+        row.addView(makeRowText(name, 1.0f))
+
+        row.addView(
+            makeStatusIcon(
+                isVisible = status == "출석",
+                drawableResId = R.drawable.attendanceweek,
+                weight = 0.75f
+            )
+        )
+
+        row.addView(
+            makeStatusIcon(
+                isVisible = status == "결석" || status == "미출석",
+                drawableResId = R.drawable.absentweek,
+                weight = 0.75f
+            )
+        )
+
+        row.addView(
+            makeStatusIcon(
+                isVisible = status == "지각",
+                drawableResId = R.drawable.lateweek,
+                weight = 0.75f
+            )
+        )
 
         parent.addView(row)
     }
@@ -744,14 +770,38 @@ class MainActivity : Activity() {
     private fun makeRowText(value: String, weight: Float): TextView {
         return TextView(this).apply {
             text = value
-            textSize = 13f
+            textSize = 12f
             gravity = Gravity.CENTER
+            includeFontPadding = false
             setTextColor(Color.parseColor("#222222"))
             layoutParams = LinearLayout.LayoutParams(
                 0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.MATCH_PARENT,
                 weight
             )
+        }
+    }
+
+    private fun makeStatusIcon(isVisible: Boolean, drawableResId: Int, weight: Float): FrameLayout {
+        return FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                weight
+            )
+
+            val icon = ImageView(this@MainActivity).apply {
+                setImageResource(drawableResId)
+                scaleType = ImageView.ScaleType.CENTER_INSIDE
+                visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
+                layoutParams = FrameLayout.LayoutParams(
+                    dpToPx(18),
+                    dpToPx(18),
+                    Gravity.CENTER
+                )
+            }
+
+            addView(icon)
         }
     }
 
@@ -993,6 +1043,63 @@ class MainActivity : Activity() {
         return SimpleDateFormat("yyyy-MM-dd", Locale.KOREA).format(Date())
     }
 
+    private fun updateLog(message: String) {
+        android.util.Log.d("UWB_DB_TEST", message)
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun testUwbMonitorAndDatabase() {
+        updateLog("[테스트 4] UWB 모니터 ↔ 실제 DB 연동 테스트 시작...")
+
+        val testSubjectCode = "TEST_SUBJECT"
+        val testStudentId = "TEST_STUDENT_01"
+        val today = apiDateText()
+        val randomFailCount = (1..3).random()
+
+        // 1. 현재 DB 값 읽기
+        FirebaseClient.get("Attendance_Records/$testSubjectCode/$today/$testStudentId") { recordJson ->
+            val status = recordJson?.optString("finalStatus")
+            updateLog("[실시간 DB 감지] 현재 파이어베이스에 기록된 학생 상태: ${status ?: "아직 판별 안됨 (빈칸)"}")
+        }
+
+        // 2. 1분 간격으로 UWB 연결 실패 상황 테스트
+        for (i in 1..randomFailCount) {
+            handler.postDelayed({
+                updateLog("📡 앱에서 ${i}번째 연결 실패(false) 신호 발생!")
+
+                FirebaseClient.get("Attendance_Records/$testSubjectCode/$today/$testStudentId") { recordJson ->
+                    val currentRecord = recordJson ?: JSONObject()
+
+                    val missedCount = currentRecord.optInt("missedCount", 0) + 1
+
+                    val finalStatus = if (missedCount >= 3) {
+                        "결석"
+                    } else {
+                        currentRecord.optString("finalStatus", "출석")
+                    }
+
+                    val updatedRecord = currentRecord
+                        .put("finalStatus", finalStatus)
+                        .put("authMethod", "UWB")
+                        .put("missedCount", missedCount)
+                        .put("checkedAt", System.currentTimeMillis())
+
+                    FirebaseClient.put(
+                        "Attendance_Records/$testSubjectCode/$today/$testStudentId",
+                        updatedRecord
+                    ) {
+                        updateLog("[실시간 DB 감지] 현재 파이어베이스에 기록된 학생 상태: $finalStatus / UWB 실패 ${missedCount}회")
+                    }
+                }
+            }, 60000L * i)
+        }
+
+        // 3. 테스트 종료 로그
+        handler.postDelayed({
+            updateLog("[테스트 4] DB 연동 테스트 자동 종료.")
+        }, 60000L * randomFailCount + 5000L)
+    }
+
     private fun logout() {
         getSharedPreferences("LOGIN_INFO", MODE_PRIVATE).edit().clear().apply()
         getSharedPreferences("login_pref", MODE_PRIVATE).edit().clear().apply()
@@ -1004,4 +1111,6 @@ class MainActivity : Activity() {
         startActivity(intent)
         finish()
     }
+
+
 }

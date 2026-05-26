@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:fontFamily="@font/pretendard_medium"
-                android:text="2026.03.26 금"
+                android:text="    "
                 android:textColor="#4A4A4A"
                 android:textSize="20sp" />
 
@@ -75,7 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/pretendard_bold"
-                android:text="1교시"
+                android:text="  "
                 android:textColor="#4A4A4A"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -86,10 +86,10 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardClassInfo"
         android:layout_width="match_parent"
-        android:layout_height="92dp"
+        android:layout_height="72dp"
         android:layout_marginStart="14dp"
         android:layout_marginEnd="14dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="1dp"
         app:cardBackgroundColor="#FFFFFF"
         app:cardCornerRadius="9dp"
         app:cardElevation="0dp">
@@ -107,21 +107,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/pretendard_bold"
-                android:text="모바일 프로그래밍"
+                android:text="   "
                 android:textColor="#004B83"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="17dp"
+                    android:layout_height="17dp"
                     android:src="@drawable/tabler_clock"
                     android:tint="#555555" />
 
@@ -131,9 +131,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
                     android:fontFamily="@font/pretendard_medium"
-                    android:text="10:00 ~ 10:50"
+                    android:text="   "
                     android:textColor="#444444"
-                    android:textSize="15sp" />
+                    android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -299,11 +299,11 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- 출석 제어 카드 -->
+        <!-- 출석 제어 카드 : 큰 제목 삭제 / 안내문을 PIN 박스 안으로 이동 -->
         <androidx.cardview.widget.CardView
             android:id="@+id/cardProfessorControlBefore15"
             android:layout_width="match_parent"
-            android:layout_height="178dp"
+            android:layout_height="128dp"
             android:layout_marginBottom="12dp"
             android:visibility="visible"
             app:cardBackgroundColor="#FFFFFF"
@@ -313,160 +313,159 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingStart="16dp"
-                android:paddingTop="14dp"
+                android:paddingTop="10dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="12dp">
 
-                <TextView
-                    android:id="@+id/tvProfessorControlTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/pretendard_bold"
-                    android:text="출석체크"
-                    android:textColor="#004B83"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvPinGuide"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:ellipsize="end"
-                    android:fontFamily="@font/pretendard_medium"
-                    android:singleLine="true"
-                    android:text="출석체크 시작 시 PIN이 표시되고 학생 블루투스 출결이 활성화됩니다."
-                    android:textColor="#777777"
-                    android:textSize="12sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="12dp"
+                <!-- PIN 박스 영역 -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/layoutPinArea"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="14dp"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    app:cardBackgroundColor="#FAFAFA"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp">
 
-                    <!-- PIN 박스 영역 -->
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/layoutPinArea"
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginEnd="14dp"
-                        android:layout_weight="1"
-                        app:cardBackgroundColor="#FAFAFA"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="0dp">
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp">
+
+                        <TextView
+                            android:id="@+id/tvPinBoxTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/pretendard_bold"
+                            android:text="학생에게 제공할 PIN"
+                            android:textColor="#555555"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvPinGuide"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:ellipsize="end"
+                            android:fontFamily="@font/pretendard_medium"
+                            android:singleLine="true"
+                            android:text="출석체크 시작 시 PIN이 표시되고 블루투스 출결이 활성화됩니다."
+                            android:textColor="#777777"
+                            android:textSize="9sp" />
 
                         <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:orientation="vertical"
-                            android:paddingStart="14dp"
-                            android:paddingEnd="14dp">
+                            android:id="@+id/layoutPinBoxes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="9dp"
+                            android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/tvPinBoxTitle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:id="@+id/tvPinDigit1"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="8dp"
+                                android:background="#E5E5E5"
                                 android:fontFamily="@font/pretendard_bold"
-                                android:text="학생에게 제공할 PIN"
-                                android:textColor="#555555"
-                                android:textSize="12sp" />
+                                android:gravity="center"
+                                android:text=""
+                                android:textColor="#004B83"
+                                android:textSize="19sp"
+                                android:textStyle="bold" />
 
-                            <LinearLayout
-                                android:id="@+id/layoutPinBoxes"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/tvPinDigit2"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="8dp"
+                                android:background="#E5E5E5"
+                                android:fontFamily="@font/pretendard_bold"
+                                android:gravity="center"
+                                android:text=""
+                                android:textColor="#004B83"
+                                android:textSize="19sp"
+                                android:textStyle="bold" />
 
-                                <TextView
-                                    android:id="@+id/tvPinDigit1"
-                                    android:layout_width="40dp"
-                                    android:layout_height="40dp"
-                                    android:layout_marginEnd="8dp"
-                                    android:background="#E5E5E5"
-                                    android:fontFamily="@font/pretendard_bold"
-                                    android:gravity="center"
-                                    android:text=""
-                                    android:textColor="#004B83"
-                                    android:textSize="19sp"
-                                    android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/tvPinDigit3"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="8dp"
+                                android:background="#E5E5E5"
+                                android:fontFamily="@font/pretendard_bold"
+                                android:gravity="center"
+                                android:text=""
+                                android:textColor="#004B83"
+                                android:textSize="19sp"
+                                android:textStyle="bold" />
 
-                                <TextView
-                                    android:id="@+id/tvPinDigit2"
-                                    android:layout_width="40dp"
-                                    android:layout_height="40dp"
-                                    android:layout_marginEnd="8dp"
-                                    android:background="#E5E5E5"
-                                    android:fontFamily="@font/pretendard_bold"
-                                    android:gravity="center"
-                                    android:text=""
-                                    android:textColor="#004B83"
-                                    android:textSize="19sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:id="@+id/tvPinDigit3"
-                                    android:layout_width="40dp"
-                                    android:layout_height="40dp"
-                                    android:layout_marginEnd="8dp"
-                                    android:background="#E5E5E5"
-                                    android:fontFamily="@font/pretendard_bold"
-                                    android:gravity="center"
-                                    android:text=""
-                                    android:textColor="#004B83"
-                                    android:textSize="19sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:id="@+id/tvPinDigit4"
-                                    android:layout_width="40dp"
-                                    android:layout_height="40dp"
-                                    android:background="#E5E5E5"
-                                    android:fontFamily="@font/pretendard_bold"
-                                    android:gravity="center"
-                                    android:text=""
-                                    android:textColor="#004B83"
-                                    android:textSize="19sp"
-                                    android:textStyle="bold" />
-                            </LinearLayout>
+                            <TextView
+                                android:id="@+id/tvPinDigit4"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="#E5E5E5"
+                                android:fontFamily="@font/pretendard_bold"
+                                android:gravity="center"
+                                android:text=""
+                                android:textColor="#004B83"
+                                android:textSize="19sp"
+                                android:textStyle="bold" />
                         </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
-                    <!-- 출석체크 버튼 -->
-                    <Button
-                        android:id="@+id/btnProfessorAttendanceCheck"
-                        android:layout_width="76dp"
-                        android:layout_height="76dp"
-                        android:background="@drawable/bg_attendance_button_blue"
-                        android:fontFamily="@font/pretendard_bold"
-                        android:gravity="center"
-                        android:padding="0dp"
-                        android:text="출석\n체크"
-                        android:textColor="#FFFFFF"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                <!-- 출석체크 버튼 -->
+                <Button
+                    android:id="@+id/btnProfessorAttendanceCheck"
+                    android:layout_width="76dp"
+                    android:layout_height="76dp"
+                    android:background="@drawable/bg_attendance_button_blue"
+                    android:fontFamily="@font/pretendard_bold"
+                    android:gravity="center"
+                    android:padding="0dp"
+                    android:text="출석\n체크"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <!-- 호명 출석 버튼 -->
-        <Button
+        <LinearLayout
             android:id="@+id/btnRollCallAttendance"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginBottom="12dp"
             android:background="@drawable/bg_attendance_button_blue"
-            android:fontFamily="@font/pretendard_bold"
-            android:text="호명 출석"
-            android:textColor="#FFFFFF"
-            android:textSize="17sp"
-            android:textStyle="bold" />
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/say"
+                android:tint="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/pretendard_bold"
+                android:text="호명 출석"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
         <!-- 15분 이후 통계 카드 -->
         <androidx.cardview.widget.CardView
@@ -660,14 +659,14 @@
 
     </LinearLayout>
 
-    <!-- 하단 메뉴  -->
+    <!-- 하단 메뉴 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="109dp"
         android:background="#FFFFFF"
         android:orientation="vertical">
 
-        <!-- 위쪽 버튼 영역: 65dp -->
+        <!-- 위쪽 버튼 영역 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
@@ -732,7 +731,7 @@
 
         </LinearLayout>
 
-        <!-- 아래쪽 영역: 44dp 그대로 유지 -->
+        <!-- 아래쪽 영역 -->
         <View
             android:layout_width="match_parent"
             android:layout_height="49dp"

@@ -99,7 +99,7 @@ interface ApiService {
      * main1.xml
      * - btnAttendance: 학생 출석 버튼
      */
-    @POST("attendance/bluetooth-check")
+    @POST("com/example/myapplication/attendance/bluetooth-check")
     fun bluetoothCheck(
         @Body request: BluetoothCheckRequest
     ): Call<AttendanceCheckResponse>
@@ -108,7 +108,7 @@ interface ApiService {
      * pin.xml
      * - PIN 출석 확인
      */
-    @POST("attendance/pin-check")
+    @POST("com/example/myapplication/attendance/pin-check")
     fun pinCheck(
         @Body request: PinCheckRequest
     ): Call<AttendanceCheckResponse>
@@ -117,7 +117,7 @@ interface ApiService {
      * UWB 중간 출석 체크
      * - UWB 감지 결과 전송
      */
-    @POST("attendance/uwb-check")
+    @POST("com/example/myapplication/attendance/uwb-check")
     fun uwbCheck(
         @Body request: UwbCheckRequest
     ): Call<UwbCheckResponse>
