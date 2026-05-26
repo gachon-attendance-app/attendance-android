@@ -184,7 +184,7 @@ object FirebaseParsers {
             "PRESENT", "출석" -> "출석"
             "LATE", "지각" -> "지각"
             "ABSENT", "결석" -> "결석"
-            "NOT_STARTED", "출석 전" -> "출석 전"
+            "NOT_STARTED", "미출석" -> "미출석"
             else -> status
         }
     }

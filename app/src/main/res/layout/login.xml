@@ -125,7 +125,7 @@
         android:focusable="true"
         android:fontFamily="@font/pretendard_regular"
         android:text="회원가입 하기"
-        android:textColor="#AAAAAA"
-        android:textSize="12sp" />
+        android:color="@color/grey700"
+        android:textSize="15sp" />
 
 </LinearLayout>
